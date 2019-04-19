@@ -415,7 +415,7 @@ func startContainer(context *cli.Context, spec *specs.Spec, action CtAct, criuOp
 	}
 
 	if notifySocket != nil {
-		err := notifySocket.setupSocket()
+		err := notifySocket.setupSocket(spec.Process.User)
 		if err != nil {
 			return -1, err
 		}

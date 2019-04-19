@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"fmt"
 	"net"
+	"os"
 	"path/filepath"
 
 	"github.com/opencontainers/runtime-spec/specs-go"
@@ -49,7 +50,7 @@ func (s *notifySocket) setupSpec(context *cli.Context, spec *specs.Spec) {
 	spec.Process.Env = append(spec.Process.Env, fmt.Sprintf("NOTIFY_SOCKET=%s", s.host))
 }
 
-func (s *notifySocket) setupSocket() error {
+func (s *notifySocket) setupSocket(user specs.User) error {
 	addr := net.UnixAddr{
 		Name: s.socketPath,
 		Net:  "unixgram",
@@ -57,6 +58,13 @@ func (s *notifySocket) setupSocket() error {
 
 	socket, err := net.ListenUnixgram("unixgram", &addr)
 	if err != nil {
+		return err
+	}
+
+	// Need to cast uint32 -> int because of: https://github.com/golang/go/issues/8537
+	err = os.Chown(s.socketPath, int(user.UID), int(user.GID))
+	if err != nil {
+		socket.Close()
 		return err
 	}
 
