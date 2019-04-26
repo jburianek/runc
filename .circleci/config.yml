@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   build-release:
     docker:
-      - image: cricleci/golang:1.12
+      - image: circleci/golang:1.12
     working_directory: /go/src/github.com/opencontainers/runc
     steps:
       - checkout
